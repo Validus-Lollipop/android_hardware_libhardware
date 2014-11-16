@@ -187,12 +187,13 @@ __BEGIN_DECLS
 #define AUDIO_OFFLOAD_CODEC_DELAY_SAMPLES  "delay_samples"
 #define AUDIO_OFFLOAD_CODEC_PADDING_SAMPLES  "padding_samples"
 
-
 /* Query if surround sound recording is supported */
 #define AUDIO_PARAMETER_KEY_SSR "ssr"
 
 /* Query ADSP Status */
 #define AUDIO_PARAMETER_KEY_ADSP_STATUS "ADSP_STATUS"
+
+#ifdef QCOM_DIRECTTRACK
 
 /** Structure to save buffer information for applying effects for
 + *  LPA buffers */
@@ -202,6 +203,7 @@ struct buf_info {
     int **buffers;
 };
 
+#endif
 
 /**************************************/
 
@@ -356,6 +358,18 @@ struct audio_stream_out {
     int (*get_render_position)(const struct audio_stream_out *stream,
                                uint32_t *dsp_frames);
 
+#ifdef QCOM_DIRECTTRACK
+    /**
+     * start audio data rendering
+     */
+    int (*start)(struct audio_stream_out *stream);
+
+    /**
+     * stop audio data rendering
+     */
+    int (*stop)(struct audio_stream_out *stream);
+#endif
+
     /**
      * start audio data rendering
      */
@@ -446,6 +460,7 @@ struct audio_stream_out {
     int (*get_presentation_position)(const struct audio_stream_out *stream,
                                uint64_t *frames, struct timespec *timestamp);
 
+#ifdef QCOM_DIRECTTRACK
     /**
     * return the current timestamp after quering to the driver
      */
@@ -468,6 +483,8 @@ struct audio_stream_out {
      */
     int (*is_buffer_available) (const struct audio_stream_out *stream,
                                      int *isAvail);
+
+#endif
 };
 typedef struct audio_stream_out audio_stream_out_t;
 
@@ -762,6 +779,7 @@ static inline int audio_hw_device_close(struct audio_hw_device* device)
     return device->common.close(&device->common);
 }
 
+#ifdef QCOM_DIRECTTRACK
 
 #ifdef __cplusplus
 /**
@@ -773,6 +791,8 @@ public:
     virtual void postEOS(int64_t delayUs) = 0;
 };
 #endif
+#endif
+
 __END_DECLS
 
 #endif  // ANDROID_AUDIO_INTERFACE_H
